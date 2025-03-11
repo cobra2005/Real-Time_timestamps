@@ -90,9 +90,20 @@
                     span.textContent = entry.text + " ";
                     span.classList.add("word");
                     span.dataset.time = entry.time;
+
                     span.onclick = () => {
-                        seekTranscript(entry.time, interval !== null);
+                        if (!hasStarted) {
+                            // Nếu transcript chưa phát, highlight từ được chọn và cập nhật thanh trượt
+                            document.querySelectorAll(".word").forEach(w => w.classList.remove("highlight"));
+                            span.classList.add("highlight");
+                            currentTime = entry.time; // Cập nhật thời gian hiện tại
+                            timeSlider.value = currentTime; // Cập nhật thanh trượt
+                        } else {
+                            // Nếu transcript đang phát, tua đến vị trí từ được chọn
+                            seekTranscript(entry.time, true);
+                        }
                     };
+
                     transcriptContainer.appendChild(span);
                 });
             }
@@ -102,11 +113,11 @@
                 const time = parseFloat(word.dataset.time);
                 if (hasStarted && currentTime >= time && (index === words.length - 1 || currentTime < transcriptData[index + 1].time)) {
                     word.classList.add("highlight");
-                } else {
+                } else if (hasStarted) {
                     word.classList.remove("highlight");
                 }
             });
-            timeSlider.value = currentTime;
+            timeSlider.value = currentTime; // Luôn cập nhật giá trị thanh trượt
         }
 
         function startTimer() {
@@ -139,6 +150,10 @@
             stopTimer();
             currentTime = 0;
             hasStarted = false;
+
+            // Xóa highlight khỏi tất cả các từ
+            document.querySelectorAll(".word").forEach(word => word.classList.remove("highlight"));
+
             renderTranscript();
         }
 
