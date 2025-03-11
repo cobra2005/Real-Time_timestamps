@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Transcript</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .transcript {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .word {
+            transition: color 0.3s ease;
+            color: black;
+            cursor: pointer;
+        }
+
+        .highlight {
+            background-color: #333;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Real-Time Transcript</h2>
+    <div class="transcript" id="transcript"></div>
+    <div class="controls">
+        <button onclick="togglePlayback()">Play/Pause</button>
+        <button onclick="resetTranscript()">Reset</button>
+        <input type="range" id="timeSlider" min="0" max="13" value="0" step="0.1"
+            oninput="seekTranscript(this.value, true)">
+    </div>
+
+    <script>
+        const transcriptData = [
+            { time: 0, text: "Hello," },
+            { time: 1, text: "welcome" },
+            { time: 2, text: "to" },
+            { time: 3, text: "our" },
+            { time: 4, text: "live" },
+            { time: 5, text: "transcript" },
+            { time: 6, text: "demo." },
+            { time: 7, text: "This" },
+            { time: 8, text: "tool" },
+            { time: 9, text: "syncs" },
+            { time: 10, text: "transcript" },
+            { time: 11, text: "text" },
+            { time: 12, text: "with" },
+            { time: 13, text: "timestamps." }
+        ];
+
+        let currentTime = 0;
+        let interval = null;
+        let hasStarted = false;
+        const transcriptContainer = document.getElementById("transcript");
+        const timeSlider = document.getElementById("timeSlider");
+
+        function renderTranscript() {
+            if (transcriptContainer.children.length === 0) {
+                transcriptData.forEach((entry, index) => {
+                    const span = document.createElement("span");
+                    span.textContent = entry.text + " ";
+                    span.classList.add("word");
+                    span.dataset.time = entry.time;
+                    span.onclick = () => {
+                        seekTranscript(entry.time, interval !== null);
+                    };
+                    transcriptContainer.appendChild(span);
+                });
+            }
+
+            const words = document.querySelectorAll(".word");
+            words.forEach((word, index) => {
+                const time = parseFloat(word.dataset.time);
+                if (hasStarted && currentTime >= time && (index === words.length - 1 || currentTime < transcriptData[index + 1].time)) {
+                    word.classList.add("highlight");
+                } else {
+                    word.classList.remove("highlight");
+                }
+            });
+            timeSlider.value = currentTime;
+        }
+
+        function startTimer() {
+            if (!interval) {
+                hasStarted = true;
+                interval = setInterval(() => {
+                    currentTime += 0.1;
+                    if (currentTime > 13) {
+                        stopTimer();
+                    }
+                    renderTranscript();
+                }, 100);
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(interval);
+            interval = null;
+        }
+
+        function togglePlayback() {
+            if (interval) {
+                stopTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function resetTranscript() {
+            stopTimer();
+            currentTime = 0;
+            hasStarted = false;
+            renderTranscript();
+        }
+
+        function seekTranscript(value, keepPlaying) {
+            currentTime = parseFloat(value);
+            renderTranscript();
+            if (keepPlaying) startTimer();
+        }
+
+        renderTranscript();
+    </script>
+</body>
+
+</html>
