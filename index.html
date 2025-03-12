@@ -93,13 +93,11 @@
 
                     span.onclick = () => {
                         if (!hasStarted) {
-                            // Nếu transcript chưa phát, highlight từ được chọn và cập nhật thanh trượt
                             document.querySelectorAll(".word").forEach(w => w.classList.remove("highlight"));
                             span.classList.add("highlight");
-                            currentTime = entry.time; // Cập nhật thời gian hiện tại
-                            timeSlider.value = currentTime; // Cập nhật thanh trượt
+                            currentTime = entry.time;
+                            timeSlider.value = currentTime;
                         } else {
-                            // Nếu transcript đang phát, tua đến vị trí từ được chọn
                             seekTranscript(entry.time, true);
                         }
                     };
@@ -117,7 +115,7 @@
                     word.classList.remove("highlight");
                 }
             });
-            timeSlider.value = currentTime; // Luôn cập nhật giá trị thanh trượt
+            timeSlider.value = currentTime;
         }
 
         function startTimer() {
@@ -139,7 +137,10 @@
         }
 
         function togglePlayback() {
-            if (interval) {
+            if (currentTime >= 13) {
+                resetTranscript();
+                startTimer();
+            } else if (interval) {
                 stopTimer();
             } else {
                 startTimer();
@@ -150,10 +151,7 @@
             stopTimer();
             currentTime = 0;
             hasStarted = false;
-
-            // Xóa highlight khỏi tất cả các từ
             document.querySelectorAll(".word").forEach(word => word.classList.remove("highlight"));
-
             renderTranscript();
         }
 
